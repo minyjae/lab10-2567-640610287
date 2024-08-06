@@ -1,7 +1,9 @@
 "use client";
 
 import axios from "axios";
-import { useState } from "react";
+import { useState,useEffect } from "react";
+import { cleanUser } from "@/libs/cleanUser";
+import UserCard from "@/components/UserCard";
 
 export default function RandomUserPage() {
   // annotate type for users state variable
@@ -9,6 +11,24 @@ export default function RandomUserPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [genAmount, setGenAmount] = useState(1);
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+
+  useEffect(() => {
+    if(isFirstLoad) {
+      setIsFirstLoad(false);
+      return;
+    }
+    const jsonAmt = JSON.stringify(genAmount);
+    localStorage.setItem("tasks", jsonAmt);
+  },[genAmount]);
+
+  useEffect(() => {
+    const jsonAmt = localStorage.getItem("tasks");
+    if(jsonAmt !== null) {
+    const newGenAmt = JSON.parse(jsonAmt);
+    setGenAmount(newGenAmt);
+    }
+  },[])
 
   const generateBtnOnClick = async () => {
     setIsLoading(true);
@@ -17,10 +37,14 @@ export default function RandomUserPage() {
     );
     setIsLoading(false);
     const users = resp.data.results;
-
+    console.log(users);
+    const shUser = users.map((users : any) => cleanUser(users));
+    console.log(shUser);
+    setUsers(shUser);
     //Your code here
     //Process result from api response with map function. Tips use function from /src/libs/cleanUser
     //Then update state with function : setUsers(...)
+
   };
 
   return (
@@ -32,7 +56,7 @@ export default function RandomUserPage() {
           className="form-control text-center"
           style={{ maxWidth: "100px" }}
           type="number"
-          onChange={(e) => setGenAmount(e.target.value)}
+          onChange={(e) => setGenAmount(Number(e.target.value))}
           value={genAmount}
         />
         <button className="btn btn-dark" onClick={generateBtnOnClick}>
@@ -42,7 +66,14 @@ export default function RandomUserPage() {
       {isLoading && (
         <p className="display-6 text-center fst-italic my-4">Loading ...</p>
       )}
-      {users && !isLoading && users.map(/*code map rendering UserCard here */)}
+      {users && !isLoading && users.map((users : any) => (
+        <UserCard
+          name = {users.name}
+          imgUrl= {users.imgUrl}
+          address = {users.address}
+          email= {users.email}
+          />
+        ))}
     </div>
   );
 }
