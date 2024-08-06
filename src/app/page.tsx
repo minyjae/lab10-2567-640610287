@@ -7,7 +7,7 @@ import UserCard from "@/components/UserCard";
 
 export default function RandomUserPage() {
   // annotate type for users state variable
-  const [users, setUsers] = useState(null);
+  const [users, setUsers] = useState([]);
 
   const [isLoading, setIsLoading] = useState(false);
   const [genAmount, setGenAmount] = useState(1);
@@ -68,6 +68,7 @@ export default function RandomUserPage() {
       )}
       {users && !isLoading && users.map((users : any) => (
         <UserCard
+          key={users.email}
           name = {users.name}
           imgUrl= {users.imgUrl}
           address = {users.address}
